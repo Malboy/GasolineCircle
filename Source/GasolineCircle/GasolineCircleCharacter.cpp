@@ -10,6 +10,8 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "Materials/Material.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Engine/World.h"
 
 AGasolineCircleCharacter::AGasolineCircleCharacter()
@@ -86,5 +88,44 @@ void AGasolineCircleCharacter::Tick(float DeltaSeconds)
 			CursorToWorld->SetWorldLocation(TraceHitResult.Location);
 			CursorToWorld->SetWorldRotation(CursorR);
 		}
+	}
+	MovementTick(DeltaSeconds);
+}
+
+void AGasolineCircleCharacter::SetupPlayerInputComponent(UInputComponent* inputComponent)
+{
+	Super::SetupPlayerInputComponent(inputComponent);
+
+	inputComponent->BindAxis(TEXT("MoveForward"), this, &AGasolineCircleCharacter::InputAxisX); //bind for Axis X
+	inputComponent->BindAxis(TEXT("MoveRight"), this, &AGasolineCircleCharacter::InputAxisY); //bind for Axis Y
+
+}
+
+void AGasolineCircleCharacter::InputAxisX(float X_value)
+{
+	AxisX = X_value;
+}
+
+void AGasolineCircleCharacter::InputAxisY(float Y_value)
+{
+	AxisY = Y_value;
+}
+
+// pulling movement vector
+void AGasolineCircleCharacter::MovementTick(float DelatTime)
+{
+	AddMovementInput(FVector(1.0f, 0.0f, 0.0f), AxisX);
+	AddMovementInput(FVector(0.0f, 1.0f, 0.0f), AxisY);
+
+	//CharacterRotationToCursor
+	APlayerController* myController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+	if (myController)
+	{
+		FHitResult ResultHit;
+		myController->GetHitResultUnderCursorByChannel(ETraceTypeQuery::TraceTypeQuery6, false, ResultHit);
+		
+		float CharRotationResultByYaw = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), ResultHit.Location).Yaw;
+		SetActorRotation(FQuat(FRotator(0.0f, CharRotationResultByYaw, 0.0f)));
+		
 	}
 }
