@@ -4,12 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Weapon/WeaponDefault.h"
 #include "GasolineCircleCharacter.generated.h"
 
 UCLASS(Blueprintable)
 class AGasolineCircleCharacter : public ACharacter
 {
 	GENERATED_BODY()
+
+protected:
+	virtual void BeginPlay() override;
 
 public:
 	AGasolineCircleCharacter();
@@ -41,6 +45,11 @@ private:
 	class UDecalComponent* CursorToWorld;
 
 public:
+	//weapon
+	AWeaponDefault* CurrentWeapon = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+		TSubclassOf<AWeaponDefault> InitWeaponClass = nullptr;
+	
 	UFUNCTION()
 		void InputAxisX(float X_value);
 	UFUNCTION()
@@ -51,5 +60,10 @@ public:
 
 	UFUNCTION()
 		void MovementTick(float DelatTime);
+	UFUNCTION()
+		void InitWeapon();
+	UFUNCTION(BlueprintCallable)
+		AWeaponDefault* GetCurrentWeapon();
+
 };
 

@@ -92,6 +92,13 @@ void AGasolineCircleCharacter::Tick(float DeltaSeconds)
 	MovementTick(DeltaSeconds);
 }
 
+void AGasolineCircleCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	InitWeapon();
+}
+
 void AGasolineCircleCharacter::SetupPlayerInputComponent(UInputComponent* inputComponent)
 {
 	Super::SetupPlayerInputComponent(inputComponent);
@@ -127,5 +134,32 @@ void AGasolineCircleCharacter::MovementTick(float DelatTime)
 		float CharRotationResultByYaw = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), ResultHit.Location).Yaw;
 		SetActorRotation(FQuat(FRotator(0.0f, CharRotationResultByYaw, 0.0f)));
 		
+	}
+}
+
+AWeaponDefault* AGasolineCircleCharacter::GetCurrentWeapon()
+{
+	return CurrentWeapon;
+}
+
+void AGasolineCircleCharacter::InitWeapon()
+{
+	if (InitWeaponClass)
+	{
+		FVector SpawnLocation = FVector(0);
+		FRotator SpawnRotator = FRotator(0);
+
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		SpawnParams.Owner = GetOwner();
+		SpawnParams.Instigator = GetInstigator();
+
+		AWeaponDefault* myWeapon = Cast<AWeaponDefault>(GetWorld()->SpawnActor(InitWeaponClass, &SpawnLocation, &SpawnRotator, SpawnParams));
+		if (myWeapon)
+		{
+			FAttachmentTransformRules Rule(EAttachmentRule::SnapToTarget, false);
+			myWeapon->AttachToComponent(GetMesh(), Rule, FName("WeaponSocketRightHand"));
+			CurrentWeapon = myWeapon;
+		}
 	}
 }
