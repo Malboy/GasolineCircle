@@ -39,6 +39,19 @@ void AWeaponDefault::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	FireTick(DeltaTime);
+
+}
+
+void AWeaponDefault::FireTick(float DeltaTime)
+{
+	if (WeaponFiring)
+	{
+		if (FireTime < 0.0f)
+			Fire();
+		else
+			FireTime -= DeltaTime;
+	}
 }
 
 void AWeaponDefault::WeaponInit()
@@ -51,5 +64,62 @@ void AWeaponDefault::WeaponInit()
 	if (StaticMeshWeapon && !StaticMeshWeapon->GetStaticMesh())
 	{
 		StaticMeshWeapon->DestroyComponent();
+	}
+}
+
+/*void AWeaponDefault::SetWeaponStateFire(bool bIsFire)
+{
+	if (CheckWeaponCanFire())
+	{
+		WeaponFiring = bIsFire;
+	else
+	{
+		WeaponFiring = false;
+	}
+}*/
+
+
+	void AWeaponDefault::SetWeaponStateFire(bool bIsFire)
+	{
+		if (CheckWeaponCanFire())
+			WeaponFiring = bIsFire;
+		else
+			WeaponFiring = false;
+	}
+
+	bool AWeaponDefault::CheckWeaponCanFire()
+{
+	return true;
+}
+
+FProjectileInfo AWeaponDefault::GetProjectile()
+{
+	return WeaponSetting.ProjectileSetting;
+}
+
+void AWeaponDefault::Fire()
+{
+	FireTime = WeaponSetting.RateOfFire;
+
+	if (ShootLocation)
+	{
+		FVector SpawnLoc = ShootLocation->GetComponentLocation();
+		FRotator SpawnRot = ShootLocation->GetComponentRotation();
+		FProjectileInfo ProjectileInfo;
+		ProjectileInfo = GetProjectile();
+
+		if (ProjectileInfo.Projectile)
+		{
+			FActorSpawnParameters SpawnParams;
+			SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+			SpawnParams.Owner = GetOwner();
+			SpawnParams.Instigator = GetInstigator();
+
+			AProjectileDefault* myProjectile = Cast<AProjectileDefault>(GetWorld()->SpawnActor(ProjectileInfo.Projectile, &SpawnLoc, &SpawnRot, SpawnParams));
+			if (myProjectile)
+			{
+				myProjectile->InitialLifeSpan = 20.0f;
+			}
+		}
 	}
 }

@@ -65,5 +65,14 @@ public:
 	UFUNCTION(BlueprintCallable)
 		AWeaponDefault* GetCurrentWeapon();
 
+	//input
+	UFUNCTION()
+		void InputAttackPressed();
+	UFUNCTION()
+		void InputAttackReleased();
+
+	//Functions
+	UFUNCTION(BlueprintCallable)
+		void AttackCharEvent(bool bIsFiring);
 };
 

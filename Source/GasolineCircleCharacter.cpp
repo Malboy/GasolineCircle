@@ -106,6 +106,8 @@ void AGasolineCircleCharacter::SetupPlayerInputComponent(UInputComponent* inputC
 	inputComponent->BindAxis(TEXT("MoveForward"), this, &AGasolineCircleCharacter::InputAxisX); //bind for Axis X
 	inputComponent->BindAxis(TEXT("MoveRight"), this, &AGasolineCircleCharacter::InputAxisY); //bind for Axis Y
 
+	inputComponent->BindAction(("FireEvent"), EInputEvent::IE_Pressed, this, &AGasolineCircleCharacter::InputAttackPressed);
+	inputComponent->BindAction(("FireEvent"), EInputEvent::IE_Released, this, &AGasolineCircleCharacter::InputAttackReleased);
 }
 
 void AGasolineCircleCharacter::InputAxisX(float X_value)
@@ -140,6 +142,26 @@ void AGasolineCircleCharacter::MovementTick(float DelatTime)
 AWeaponDefault* AGasolineCircleCharacter::GetCurrentWeapon()
 {
 	return CurrentWeapon;
+}
+
+void AGasolineCircleCharacter::InputAttackPressed()
+{
+	AttackCharEvent(true);
+}
+
+void AGasolineCircleCharacter::InputAttackReleased()
+{
+	AttackCharEvent(false);
+}
+
+void AGasolineCircleCharacter::AttackCharEvent(bool bIsFiring)
+{
+	AWeaponDefault* myWeapon = nullptr;
+	myWeapon = GetCurrentWeapon();
+	if (myWeapon)
+	{
+		myWeapon->SetWeaponStateFire(bIsFiring);
+	}
 }
 
 void AGasolineCircleCharacter::InitWeapon()
