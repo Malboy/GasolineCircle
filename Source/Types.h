@@ -14,6 +14,10 @@ struct FProjectileInfo
 		TSubclassOf<class AProjectileDefault> Projectile = nullptr;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProjectileSetting")
 		float ProjectileDamage = 20.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProjectileSetting")
+		float ProjectileLifeTime = 20.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "ProjectileSetting")
+		float ProjectileInitSpeed = 2000.0f;
 };
 
 USTRUCT(BlueprintType)
@@ -25,6 +29,12 @@ struct FWeaponInfo
 		float WeaponDamage = 20.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeaponSetting")
 		float RateOfFire = 0.5f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeaponSetting")
+		float ReloadTime = 2.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeaponSetting")
+		int32 Magazine = 10;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeaponSetting")
+		int32 MaxMagazine = 30;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeaponSetting")
 		FProjectileInfo ProjectileSetting;
 		

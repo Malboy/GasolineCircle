@@ -40,17 +40,45 @@ void AWeaponDefault::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 	FireTick(DeltaTime);
-
+	ReloadTick(DeltaTime);
 }
 
 void AWeaponDefault::FireTick(float DeltaTime)
 {
-	if (WeaponFiring)
+	if (GetWeaponMagazine() > 0)
 	{
-		if (FireTime < 0.0f)
-			Fire();
+		if (WeaponFiring)
+			if (FireTime < 0.0f)
+			{
+				if (!WeaponReloading)
+				{
+					Fire();
+				}
+			}
+			else
+				FireTime -= DeltaTime;
+	}
+	else
+	{
+		if (!WeaponReloading)
+		{
+			WeaponInitReload();
+		}
+	}
+}
+
+void AWeaponDefault::ReloadTick(float DeltaTime)
+{
+	if (WeaponReloading)
+	{
+		if (ReloadTimer < 0.0f)
+		{
+			WeaponFinishReload();
+		}
 		else
-			FireTime -= DeltaTime;
+		{
+			ReloadTimer -= DeltaTime;
+		}
 	}
 }
 
@@ -65,18 +93,10 @@ void AWeaponDefault::WeaponInit()
 	{
 		StaticMeshWeapon->DestroyComponent();
 	}
-}
 
-/*void AWeaponDefault::SetWeaponStateFire(bool bIsFire)
-{
-	if (CheckWeaponCanFire())
-	{
-		WeaponFiring = bIsFire;
-	else
-	{
-		WeaponFiring = false;
-	}
-}*/
+	WeaponSetting.Magazine = WeaponSetting.MaxMagazine;
+	ReloadTime = WeaponSetting.ReloadTime;
+}
 
 
 	void AWeaponDefault::SetWeaponStateFire(bool bIsFire)
@@ -100,6 +120,7 @@ FProjectileInfo AWeaponDefault::GetProjectile()
 void AWeaponDefault::Fire()
 {
 	FireTime = WeaponSetting.RateOfFire;
+	WeaponSetting.Magazine = WeaponSetting.Magazine - 1;
 
 	if (ShootLocation)
 	{
@@ -107,6 +128,12 @@ void AWeaponDefault::Fire()
 		FRotator SpawnRot = ShootLocation->GetComponentRotation();
 		FProjectileInfo ProjectileInfo;
 		ProjectileInfo = GetProjectile();
+
+		FVector Dir = ShootEndLocation - SpawnLoc;
+		Dir.Normalize();
+
+		FMatrix myMatrix(Dir, FVector(0, 1, 0), FVector(0, 0, 1), FVector::ZeroVector);
+		SpawnRot = myMatrix.Rotator();
 
 		if (ProjectileInfo.Projectile)
 		{
@@ -122,4 +149,24 @@ void AWeaponDefault::Fire()
 			}
 		}
 	}
+}
+
+int32 AWeaponDefault::GetWeaponMagazine()
+{
+	return WeaponSetting.Magazine;
+}
+
+void AWeaponDefault::WeaponInitReload()
+{
+	WeaponReloading = true;
+
+	ReloadTimer = WeaponSetting.ReloadTime;
+	OnWeaponReloadStart.Broadcast();
+}
+
+void AWeaponDefault::WeaponFinishReload()
+{
+	WeaponReloading = false;
+
+	WeaponSetting.Magazine = WeaponSetting.MaxMagazine;
 }

@@ -10,6 +10,8 @@
 #include "WeaponDefault.generated.h"
 
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWeaponReloadStart);
+
 UCLASS()
 class GASOLINECIRCLE_API AWeaponDefault : public AActor
 {
@@ -18,6 +20,8 @@ class GASOLINECIRCLE_API AWeaponDefault : public AActor
 public:	
 	// Sets default values for this actor's properties
 	AWeaponDefault();
+
+	FOnWeaponReloadStart OnWeaponReloadStart;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Components")
 		class USceneComponent* SceneComponent = nullptr;
@@ -40,11 +44,14 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void FireTick(float DeltaTime);
+	void ReloadTick(float DeltaTime);
 
 	void WeaponInit();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FireLogic")
 		bool WeaponFiring = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FireLogic")
+		bool WeaponReloading = false;
 
 	UFUNCTION(BlueprintCallable)
 		void SetWeaponStateFire(bool bIsFire);
@@ -55,6 +62,17 @@ public:
 
 	void Fire();
 
+	UFUNCTION(BlueprintCallable)
+		int32 GetWeaponMagazine();
+
+	void WeaponInitReload();
+	void WeaponFinishReload();
 
 	float FireTime = 0.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FireLogic")
+		float ReloadTimer = 0.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FireLogic")
+		float ReloadTime = 0.0f;
+
+	FVector ShootEndLocation = FVector(0);
 };

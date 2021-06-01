@@ -108,6 +108,8 @@ void AGasolineCircleCharacter::SetupPlayerInputComponent(UInputComponent* inputC
 
 	inputComponent->BindAction(("FireEvent"), EInputEvent::IE_Pressed, this, &AGasolineCircleCharacter::InputAttackPressed);
 	inputComponent->BindAction(("FireEvent"), EInputEvent::IE_Released, this, &AGasolineCircleCharacter::InputAttackReleased);
+	inputComponent->BindAction(("ReloadEvent"), EInputEvent::IE_Released, this, &AGasolineCircleCharacter::TryReloadWeapon);
+
 }
 
 void AGasolineCircleCharacter::InputAxisX(float X_value)
@@ -131,11 +133,16 @@ void AGasolineCircleCharacter::MovementTick(float DelatTime)
 	if (myController)
 	{
 		FHitResult ResultHit;
-		myController->GetHitResultUnderCursorByChannel(ETraceTypeQuery::TraceTypeQuery6, false, ResultHit);
+		myController->GetHitResultUnderCursor(ECC_GameTraceChannel1, true, ResultHit);
 		
 		float CharRotationResultByYaw = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), ResultHit.Location).Yaw;
 		SetActorRotation(FQuat(FRotator(0.0f, CharRotationResultByYaw, 0.0f)));
 		
+		if (CurrentWeapon)
+		{
+			FVector Displacement = FVector(0.0f, 0.0f, 120.0f);
+			CurrentWeapon->ShootEndLocation = ResultHit.Location + Displacement;
+		}
 	}
 }
 
@@ -154,6 +161,27 @@ void AGasolineCircleCharacter::InputAttackReleased()
 	AttackCharEvent(false);
 }
 
+void AGasolineCircleCharacter::TryReloadWeapon()
+{
+	if (CurrentWeapon)
+	{
+		if (CurrentWeapon->GetWeaponMagazine() <= CurrentWeapon->WeaponSetting.MaxMagazine)
+		{
+			CurrentWeapon->WeaponInitReload();
+		}
+	}
+}
+
+void AGasolineCircleCharacter::WeaponReloadStart()
+{
+	WeaponReloadStart_BP();
+}
+
+void AGasolineCircleCharacter::WeaponReloadStart_BP_Implementation()
+{
+	//BP
+}
+
 void AGasolineCircleCharacter::AttackCharEvent(bool bIsFiring)
 {
 	AWeaponDefault* myWeapon = nullptr;
@@ -161,6 +189,7 @@ void AGasolineCircleCharacter::AttackCharEvent(bool bIsFiring)
 	if (myWeapon)
 	{
 		myWeapon->SetWeaponStateFire(bIsFiring);
+		myWeapon->OnWeaponReloadStart.AddDynamic(this, &AGasolineCircleCharacter::WeaponReloadStart);
 	}
 }
 
@@ -182,6 +211,7 @@ void AGasolineCircleCharacter::InitWeapon()
 			FAttachmentTransformRules Rule(EAttachmentRule::SnapToTarget, false);
 			myWeapon->AttachToComponent(GetMesh(), Rule, FName("WeaponSocketRightHand"));
 			CurrentWeapon = myWeapon;
+	
 		}
 	}
 }

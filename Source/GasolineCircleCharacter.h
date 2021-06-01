@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "WeaponDefault.h"
+#include "Types.h"
 #include "GasolineCircleCharacter.generated.h"
 
 UCLASS(Blueprintable)
@@ -66,10 +67,16 @@ public:
 		AWeaponDefault* GetCurrentWeapon();
 
 	//input
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 		void InputAttackPressed();
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 		void InputAttackReleased();
+	UFUNCTION(BlueprintCallable)
+		void TryReloadWeapon();
+	UFUNCTION()
+		void WeaponReloadStart();
+	UFUNCTION(BlueprintNativeEvent)
+		void WeaponReloadStart_BP();
 
 	//Functions
 	UFUNCTION(BlueprintCallable)
