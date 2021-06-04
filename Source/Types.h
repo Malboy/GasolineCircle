@@ -40,6 +40,28 @@ struct FWeaponInfo
 		
 };
 
+USTRUCT(BlueprintType)
+struct FAdditionalWeaponInfo
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AmmoStats")
+		int32 Round = 0;
+};
+
+USTRUCT(BlueprintType)
+struct FAmmoSlot
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AmmoSlot")
+		int32 Cout = 100;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AmmoSlot")
+		int32 MaxCout = 100;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AmmoSlot")
+		FAdditionalWeaponInfo AdditionalInfo;
+};
+
 UCLASS()
 class GASOLINECIRCLE_API UTypes : public UBlueprintFunctionLibrary
 {

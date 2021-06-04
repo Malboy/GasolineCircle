@@ -54,6 +54,13 @@ AGasolineCircleCharacter::AGasolineCircleCharacter()
 	CursorToWorld->DecalSize = FVector(16.0f, 32.0f, 32.0f);
 	CursorToWorld->SetRelativeRotation(FRotator(90.0f, 0.0f, 0.0f).Quaternion());
 
+	// SetupInventory
+	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
+	if (InventoryComponent)
+	{
+		InventoryComponent->OnSwitchWeapon.AddDynamic(this, &AGasolineCircleCharacter::InitWeapon);
+	}
+
 	// Activate ticking in order to update the cursor every frame.
 	PrimaryActorTick.bCanEverTick = true;
 	PrimaryActorTick.bStartWithTickEnabled = true;
@@ -96,7 +103,7 @@ void AGasolineCircleCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
-	InitWeapon();
+	//InitWeapon();
 }
 
 void AGasolineCircleCharacter::SetupPlayerInputComponent(UInputComponent* inputComponent)
@@ -193,8 +200,9 @@ void AGasolineCircleCharacter::AttackCharEvent(bool bIsFiring)
 	}
 }
 
-void AGasolineCircleCharacter::InitWeapon()
+void AGasolineCircleCharacter::InitWeapon(FAdditionalWeaponInfo WeaponAdditionalinfo)
 {
+	FWeaponInfo myWeaponInfo;
 	if (InitWeaponClass)
 	{
 		FVector SpawnLocation = FVector(0);
@@ -211,6 +219,8 @@ void AGasolineCircleCharacter::InitWeapon()
 			FAttachmentTransformRules Rule(EAttachmentRule::SnapToTarget, false);
 			myWeapon->AttachToComponent(GetMesh(), Rule, FName("WeaponSocketRightHand"));
 			CurrentWeapon = myWeapon;
+
+			CurrentWeapon->AdditionalWeaponInfo = WeaponAdditionalinfo;
 	
 		}
 	}

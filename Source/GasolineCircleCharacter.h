@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "WeaponDefault.h"
 #include "Types.h"
+#include "InventoryComponent.h"
 #include "GasolineCircleCharacter.generated.h"
 
 UCLASS(Blueprintable)
@@ -31,6 +32,9 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns CursorToWorld subobject **/
 	FORCEINLINE class UDecalComponent* GetCursorToWorld() { return CursorToWorld; }
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+		class UInventoryComponent* InventoryComponent;
 
 private:
 	/** Top down camera */
@@ -62,7 +66,7 @@ public:
 	UFUNCTION()
 		void MovementTick(float DelatTime);
 	UFUNCTION()
-		void InitWeapon();
+		void InitWeapon(FAdditionalWeaponInfo WeaponAdditionalinfo);
 	UFUNCTION(BlueprintCallable)
 		AWeaponDefault* GetCurrentWeapon();
 
