@@ -94,8 +94,8 @@ void AWeaponDefault::WeaponInit()
 		StaticMeshWeapon->DestroyComponent();
 	}
 
-	WeaponSetting.Magazine = WeaponSetting.MaxMagazine;
-	ReloadTime = WeaponSetting.ReloadTime;
+	//WeaponSetting.Magazine = WeaponSetting.MaxMagazine;
+	//ReloadTime = WeaponSetting.ReloadTime;
 }
 
 
@@ -145,7 +145,8 @@ void AWeaponDefault::Fire()
 			AProjectileDefault* myProjectile = Cast<AProjectileDefault>(GetWorld()->SpawnActor(ProjectileInfo.Projectile, &SpawnLoc, &SpawnRot, SpawnParams));
 			if (myProjectile)
 			{
-				myProjectile->InitialLifeSpan = 20.0f;
+				myProjectile->InitProjectile(WeaponSetting.ProjectileSetting);
+				//myProjectile->InitialLifeSpan = 20.0f;
 			}
 		}
 	}

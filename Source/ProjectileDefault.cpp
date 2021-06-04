@@ -2,6 +2,7 @@
 
 
 #include "ProjectileDefault.h"
+#include "Kismet/GameplayStatics.h"
 
 // Sets default values
 AProjectileDefault::AProjectileDefault()
@@ -12,10 +13,6 @@ AProjectileDefault::AProjectileDefault()
 	BulletCollisionSphere = CreateDefaultSubobject<USphereComponent>(TEXT("Collision Sphere"));
 
 	BulletCollisionSphere->SetSphereRadius(16.0f);
-
-	BulletCollisionSphere->OnComponentHit.AddDynamic(this, &AProjectileDefault::BulletCollisionSphereHit);
-	BulletCollisionSphere->OnComponentBeginOverlap.AddDynamic(this, &AProjectileDefault::BulletCollisionSphereBeginOverlap);
-	BulletCollisionSphere->OnComponentEndOverlap.AddDynamic(this, &AProjectileDefault::BulletCollisionSphereEndOverlap);
 
 	BulletCollisionSphere->bReturnMaterialOnMove = true; // return material on Hit Event
 
@@ -42,6 +39,10 @@ void AProjectileDefault::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	BulletCollisionSphere->OnComponentHit.AddDynamic(this, &AProjectileDefault::BulletCollisionSphereHit);
+	BulletCollisionSphere->OnComponentBeginOverlap.AddDynamic(this, &AProjectileDefault::BulletCollisionSphereBeginOverlap);
+	BulletCollisionSphere->OnComponentEndOverlap.AddDynamic(this, &AProjectileDefault::BulletCollisionSphereEndOverlap);
+
 }
 
 // Called every frame
@@ -51,8 +52,23 @@ void AProjectileDefault::Tick(float DeltaTime)
 
 }
 
+void AProjectileDefault::InitProjectile(FProjectileInfo InitParam)
+{
+	BulletProjectileMovement->InitialSpeed = InitParam.ProjectileInitSpeed;
+	this->SetLifeSpan(InitParam.ProjectileLifeTime);
+
+	ProjectileSetting = InitParam;
+}
+
+void AProjectileDefault::ImpactProjectile()
+{
+	this->Destroy();
+}
+
 void AProjectileDefault::BulletCollisionSphereHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpule, const FHitResult& Hit)
 {
+	UGameplayStatics::ApplyDamage(OtherActor,ProjectileSetting.ProjectileDamage,GetInstigatorController(), this, NULL);
+	ImpactProjectile();
 }
 
 void AProjectileDefault::BulletCollisionSphereBeginOverlap(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

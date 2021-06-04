@@ -163,9 +163,9 @@ void AGasolineCircleCharacter::InputAttackReleased()
 
 void AGasolineCircleCharacter::TryReloadWeapon()
 {
-	if (CurrentWeapon)
+	if (CurrentWeapon && !CurrentWeapon->WeaponReloading)
 	{
-		if (CurrentWeapon->GetWeaponMagazine() <= CurrentWeapon->WeaponSetting.MaxMagazine)
+		if (CurrentWeapon->GetWeaponMagazine() < CurrentWeapon->WeaponSetting.MaxMagazine)
 		{
 			CurrentWeapon->WeaponInitReload();
 		}
