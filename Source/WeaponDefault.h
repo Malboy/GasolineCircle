@@ -11,6 +11,7 @@
 
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWeaponReloadStart);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnWeaponReloadEnd, bool, bIsSucces, int32, AmmoSafe);
 
 UCLASS()
 class GASOLINECIRCLE_API AWeaponDefault : public AActor
@@ -22,6 +23,7 @@ public:
 	AWeaponDefault();
 
 	FOnWeaponReloadStart OnWeaponReloadStart;
+	FOnWeaponReloadEnd OnWeaponReloadEnd;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = "Components")
 		class USceneComponent* SceneComponent = nullptr;

@@ -120,7 +120,7 @@ FProjectileInfo AWeaponDefault::GetProjectile()
 void AWeaponDefault::Fire()
 {
 	FireTime = WeaponSetting.RateOfFire;
-	WeaponSetting.Magazine = WeaponSetting.Magazine - 1;
+	AdditionalWeaponInfo.Round = AdditionalWeaponInfo.Round - 1;
 
 	if (ShootLocation)
 	{
@@ -154,7 +154,7 @@ void AWeaponDefault::Fire()
 
 int32 AWeaponDefault::GetWeaponMagazine()
 {
-	return WeaponSetting.Magazine;
+	return AdditionalWeaponInfo.Round;
 }
 
 void AWeaponDefault::WeaponInitReload()
@@ -168,6 +168,9 @@ void AWeaponDefault::WeaponInitReload()
 void AWeaponDefault::WeaponFinishReload()
 {
 	WeaponReloading = false;
+	int32 AmmoNeedTake = AdditionalWeaponInfo.Round;
+	AmmoNeedTake = AmmoNeedTake - WeaponSetting.MaxMagazine;
+	AdditionalWeaponInfo.Round = WeaponSetting.MaxMagazine;
 
-	WeaponSetting.Magazine = WeaponSetting.MaxMagazine;
+	OnWeaponReloadEnd.Broadcast(true, AmmoNeedTake);
 }

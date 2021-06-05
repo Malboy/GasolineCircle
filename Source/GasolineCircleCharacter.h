@@ -81,6 +81,10 @@ public:
 		void WeaponReloadStart();
 	UFUNCTION(BlueprintNativeEvent)
 		void WeaponReloadStart_BP();
+	UFUNCTION()
+		void WeaponReloadEnd(bool bIsSuccess, int32 AmmoTake);
+	UFUNCTION(BlueprintNativeEvent)
+		void WeaponReloadEnd_BP(bool bIsSuccess);
 
 	//Functions
 	UFUNCTION(BlueprintCallable)

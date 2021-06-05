@@ -33,6 +33,24 @@ void UInventoryComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 	// ...
 }
 
+bool UInventoryComponent::SwitchWeapon(FAdditionalWeaponInfo Info)
+{
+	bool bIsSucces = false;
+	FAdditionalWeaponInfo NewAdditionalInfo;
+	if (!bIsSucces)
+	{
+		NewAdditionalInfo = AmmoSlots.AdditionalInfo;
+		bIsSucces = true;
+	}
+	
+	if (bIsSucces)
+	{
+		SetAdditionalInfoWeapon(Info);
+		OnSwitchWeapon.Broadcast(NewAdditionalInfo);
+	}
+	return bIsSucces;
+}
+
 FAdditionalWeaponInfo UInventoryComponent::GetAdditionalInfoWeapon()
 {
 	return FAdditionalWeaponInfo();
@@ -40,5 +58,17 @@ FAdditionalWeaponInfo UInventoryComponent::GetAdditionalInfoWeapon()
 
 void UInventoryComponent::SetAdditionalInfoWeapon(FAdditionalWeaponInfo NewInfo)
 {
+	AmmoSlots.AdditionalInfo = NewInfo;
+	
+}
+
+void UInventoryComponent::WeaponChangeAmmo(int32 AmmoTaken)
+{
+	AmmoSlots.Cout += AmmoTaken;
+	if (AmmoSlots.Cout > AmmoSlots.MaxCout)
+	{
+		AmmoSlots.Cout = AmmoSlots.MaxCout;
+	}
+	OnAmmoChange.Broadcast(AmmoSlots.Cout);
 }
 

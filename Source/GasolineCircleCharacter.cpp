@@ -184,6 +184,20 @@ void AGasolineCircleCharacter::WeaponReloadStart()
 	WeaponReloadStart_BP();
 }
 
+void AGasolineCircleCharacter::WeaponReloadEnd(bool bIsSuccess, int32 AmmoTake)
+{
+	if (InventoryComponent)
+	{
+		InventoryComponent->WeaponChangeAmmo(AmmoTake);
+	}
+	WeaponReloadEnd_BP(bIsSuccess);
+}
+
+void AGasolineCircleCharacter::WeaponReloadEnd_BP_Implementation(bool bIsSuccess)
+{
+	//Bp
+}
+
 void AGasolineCircleCharacter::WeaponReloadStart_BP_Implementation()
 {
 	//BP
@@ -196,7 +210,8 @@ void AGasolineCircleCharacter::AttackCharEvent(bool bIsFiring)
 	if (myWeapon)
 	{
 		myWeapon->SetWeaponStateFire(bIsFiring);
-		myWeapon->OnWeaponReloadStart.AddDynamic(this, &AGasolineCircleCharacter::WeaponReloadStart);
+		//myWeapon->OnWeaponReloadStart.AddDynamic(this, &AGasolineCircleCharacter::WeaponReloadStart);
+		//myWeapon->OnWeaponReloadEnd.AddDynamic(this, &AGasolineCircleCharacter::WeaponReloadEnd);
 	}
 }
 
@@ -220,8 +235,23 @@ void AGasolineCircleCharacter::InitWeapon(FAdditionalWeaponInfo WeaponAdditional
 			myWeapon->AttachToComponent(GetMesh(), Rule, FName("WeaponSocketRightHand"));
 			CurrentWeapon = myWeapon;
 
-			CurrentWeapon->AdditionalWeaponInfo = WeaponAdditionalinfo;
-	
+			myWeapon->AdditionalWeaponInfo.Round = myWeapon->WeaponSetting.MaxMagazine;
+
+			myWeapon->ReloadTime = myWeapon->WeaponSetting.ReloadTime;
+
+			myWeapon->AdditionalWeaponInfo = WeaponAdditionalinfo;
+			/*
+			
+			myWeapon->WeaponSetting = myWeaponInfo;
+
+			myWeapon->AdditionalWeaponInfo.Round = myWeaponInfo.MaxMagazine;
+
+			myWeapon->ReloadTime = myWeaponInfo.ReloadTime;
+
+			*/
+
+			myWeapon->OnWeaponReloadStart.AddDynamic(this, &AGasolineCircleCharacter::WeaponReloadStart);
+			myWeapon->OnWeaponReloadEnd.AddDynamic(this, &AGasolineCircleCharacter::WeaponReloadEnd);
 		}
 	}
 }
