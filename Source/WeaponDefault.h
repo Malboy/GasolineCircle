@@ -10,6 +10,7 @@
 #include "WeaponDefault.generated.h"
 
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWeaponFireStart);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWeaponReloadStart);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnWeaponReloadEnd, bool, bIsSucces, int32, AmmoSafe);
 
@@ -22,6 +23,7 @@ public:
 	// Sets default values for this actor's properties
 	AWeaponDefault();
 
+	FOnWeaponFireStart OnWeaponFireStart;
 	FOnWeaponReloadStart OnWeaponReloadStart;
 	FOnWeaponReloadEnd OnWeaponReloadEnd;
 
@@ -61,6 +63,7 @@ public:
 		void SetWeaponStateFire(bool bIsFire);
 
 	bool CheckWeaponCanFire();
+	bool CanWeaponReload();
 
 	FProjectileInfo GetProjectile();
 
@@ -77,6 +80,8 @@ public:
 		float ReloadTimer = 0.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "FireLogic")
 		float ReloadTime = 0.0f;
+
+	int8 GetAviableAmmoForReload();
 
 	FVector ShootEndLocation = FVector(0);
 };

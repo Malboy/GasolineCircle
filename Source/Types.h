@@ -40,7 +40,7 @@ struct FWeaponInfo
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeaponSetting")
 		float ReloadTime = 2.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeaponSetting")
-		int32 Magazine = 10;
+		int32 Magazine = 30;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeaponSetting")
 		int32 MaxMagazine = 30;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "WeaponSetting")

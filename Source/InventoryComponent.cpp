@@ -59,6 +59,7 @@ FAdditionalWeaponInfo UInventoryComponent::GetAdditionalInfoWeapon()
 void UInventoryComponent::SetAdditionalInfoWeapon(FAdditionalWeaponInfo NewInfo)
 {
 	AmmoSlots.AdditionalInfo = NewInfo;
+	OnWeaponAdditionalInfoChange.Broadcast(NewInfo);
 	
 }
 
@@ -70,5 +71,17 @@ void UInventoryComponent::WeaponChangeAmmo(int32 AmmoTaken)
 		AmmoSlots.Cout = AmmoSlots.MaxCout;
 	}
 	OnAmmoChange.Broadcast(AmmoSlots.Cout);
+}
+
+bool UInventoryComponent::CheckAmmoForWeapon(int8 &AviableAmmoForWeapon)
+{
+	AviableAmmoForWeapon = AmmoSlots.Cout;
+	if (AmmoSlots.Cout > 0)
+	{
+		return true;
+	}
+
+	OnWeaponAmmoEmpty.Broadcast();
+	return false;
 }
 

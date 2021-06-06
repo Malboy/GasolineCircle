@@ -2,6 +2,7 @@
 
 
 #include "WeaponDefault.h"
+#include "InventoryComponent.h"
 
 // Sets default values
 AWeaponDefault::AWeaponDefault()
@@ -60,7 +61,7 @@ void AWeaponDefault::FireTick(float DeltaTime)
 	}
 	else
 	{
-		if (!WeaponReloading)
+		if (!WeaponReloading && CanWeaponReload())
 		{
 			WeaponInitReload();
 		}
@@ -112,6 +113,24 @@ void AWeaponDefault::WeaponInit()
 	return true;
 }
 
+	bool AWeaponDefault::CanWeaponReload()
+	{
+		bool result = true;
+		if (GetOwner())
+		{
+			UInventoryComponent* myInv = Cast<UInventoryComponent>(GetOwner()->GetComponentByClass(UInventoryComponent::StaticClass()));
+			if (myInv)
+			{
+				int8 AviableAmmorForWeapon;
+				if (!myInv->CheckAmmoForWeapon(AviableAmmorForWeapon))
+				{
+					result = false;
+				}
+			}
+		}
+		return result;
+	}
+
 FProjectileInfo AWeaponDefault::GetProjectile()
 {
 	return WeaponSetting.ProjectileSetting;
@@ -121,6 +140,8 @@ void AWeaponDefault::Fire()
 {
 	FireTime = WeaponSetting.RateOfFire;
 	AdditionalWeaponInfo.Round = AdditionalWeaponInfo.Round - 1;
+
+	OnWeaponFireStart.Broadcast();
 
 	if (ShootLocation)
 	{
@@ -168,9 +189,44 @@ void AWeaponDefault::WeaponInitReload()
 void AWeaponDefault::WeaponFinishReload()
 {
 	WeaponReloading = false;
-	int32 AmmoNeedTake = AdditionalWeaponInfo.Round;
-	AmmoNeedTake = AmmoNeedTake - WeaponSetting.MaxMagazine;
-	AdditionalWeaponInfo.Round = WeaponSetting.MaxMagazine;
 
-	OnWeaponReloadEnd.Broadcast(true, AmmoNeedTake);
+	int8 AviableAmmoFromInventory = GetAviableAmmoForReload();
+	int8 AmmoNeedTakeFromInv;
+	int8 NeedToReload = WeaponSetting.MaxMagazine - AdditionalWeaponInfo.Round;
+
+	if (NeedToReload > AviableAmmoFromInventory)
+	{
+		AdditionalWeaponInfo.Round += AviableAmmoFromInventory;
+		AmmoNeedTakeFromInv = AviableAmmoFromInventory;
+	}
+	else
+	{
+		AdditionalWeaponInfo.Round = AdditionalWeaponInfo.Round + NeedToReload;
+		AmmoNeedTakeFromInv = NeedToReload;
+	}
+	/*if (AviableAmmoFromInventory > WeaponSetting.MaxMagazine)
+		AviableAmmoFromInventory = WeaponSetting.MaxMagazine;
+
+	int32 AmmoNeedTake = AdditionalWeaponInfo.Round;
+	AmmoNeedTake = AmmoNeedTake - AviableAmmoFromInventory;
+	AdditionalWeaponInfo.Round = AviableAmmoFromInventory;
+	*/
+	OnWeaponReloadEnd.Broadcast(true, -AmmoNeedTakeFromInv);
+}
+
+int8 AWeaponDefault::GetAviableAmmoForReload()
+{
+	int8 AviableAmmorForWeapon = WeaponSetting.MaxMagazine;
+	if (GetOwner())
+	{
+		UInventoryComponent* myInv = Cast<UInventoryComponent>(GetOwner()->GetComponentByClass(UInventoryComponent::StaticClass()));
+		if (myInv)
+		{
+			if (myInv->CheckAmmoForWeapon(AviableAmmorForWeapon))
+			{
+				AviableAmmorForWeapon = AviableAmmorForWeapon;
+			}
+		}
+	}
+	return AviableAmmorForWeapon;
 }

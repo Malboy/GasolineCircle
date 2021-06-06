@@ -9,6 +9,8 @@
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnSwitchWeapon, FAdditionalWeaponInfo, WeaponAdditionalInfo);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAmmoChange, int32, Cout);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponAdditionalInfoChange, FAdditionalWeaponInfo, AdditionalInfo);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWeaponAmmoEmpty);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class GASOLINECIRCLE_API UInventoryComponent : public UActorComponent
@@ -22,6 +24,10 @@ public:
 	FOnSwitchWeapon OnSwitchWeapon;
 	UPROPERTY(BlueprintAssignable, EditAnywhere, BlueprintReadWrite, Category = "Inventory")
 		FOnAmmoChange OnAmmoChange;
+	UPROPERTY(BlueprintAssignable, EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+		FOnWeaponAdditionalInfoChange OnWeaponAdditionalInfoChange;
+	UPROPERTY(BlueprintAssignable, EditAnywhere, BlueprintReadWrite, Category = "Inventory")
+		FOnWeaponAmmoEmpty OnWeaponAmmoEmpty;
 
 protected:
 	// Called when the game starts
@@ -40,4 +46,5 @@ public:
 	void SetAdditionalInfoWeapon(FAdditionalWeaponInfo NewInfo);
 
 	void WeaponChangeAmmo(int32 AmmoTaken);
+	bool CheckAmmoForWeapon(int8 &AviableAmmoForWeapon);
 };

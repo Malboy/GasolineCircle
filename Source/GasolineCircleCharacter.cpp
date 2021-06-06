@@ -172,7 +172,7 @@ void AGasolineCircleCharacter::TryReloadWeapon()
 {
 	if (CurrentWeapon && !CurrentWeapon->WeaponReloading)
 	{
-		if (CurrentWeapon->GetWeaponMagazine() < CurrentWeapon->WeaponSetting.MaxMagazine)
+		if (CurrentWeapon->GetWeaponMagazine() < CurrentWeapon->WeaponSetting.MaxMagazine && CurrentWeapon->CanWeaponReload())
 		{
 			CurrentWeapon->WeaponInitReload();
 		}
@@ -203,6 +203,14 @@ void AGasolineCircleCharacter::WeaponReloadStart_BP_Implementation()
 	//BP
 }
 
+void AGasolineCircleCharacter::WeaponFireStart()
+{
+	if (InventoryComponent && CurrentWeapon)
+	{
+		InventoryComponent->SetAdditionalInfoWeapon(CurrentWeapon->AdditionalWeaponInfo);
+	}
+}
+
 void AGasolineCircleCharacter::AttackCharEvent(bool bIsFiring)
 {
 	AWeaponDefault* myWeapon = nullptr;
@@ -217,6 +225,7 @@ void AGasolineCircleCharacter::AttackCharEvent(bool bIsFiring)
 
 void AGasolineCircleCharacter::InitWeapon(FAdditionalWeaponInfo WeaponAdditionalinfo)
 {
+	
 	FWeaponInfo myWeaponInfo;
 	if (InitWeaponClass)
 	{
@@ -225,7 +234,7 @@ void AGasolineCircleCharacter::InitWeapon(FAdditionalWeaponInfo WeaponAdditional
 
 		FActorSpawnParameters SpawnParams;
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		SpawnParams.Owner = GetOwner();
+		SpawnParams.Owner = this;
 		SpawnParams.Instigator = GetInstigator();
 
 		AWeaponDefault* myWeapon = Cast<AWeaponDefault>(GetWorld()->SpawnActor(InitWeaponClass, &SpawnLocation, &SpawnRotator, SpawnParams));
@@ -235,11 +244,12 @@ void AGasolineCircleCharacter::InitWeapon(FAdditionalWeaponInfo WeaponAdditional
 			myWeapon->AttachToComponent(GetMesh(), Rule, FName("WeaponSocketRightHand"));
 			CurrentWeapon = myWeapon;
 
-			myWeapon->AdditionalWeaponInfo.Round = myWeapon->WeaponSetting.MaxMagazine;
 
 			myWeapon->ReloadTime = myWeapon->WeaponSetting.ReloadTime;
 
 			myWeapon->AdditionalWeaponInfo = WeaponAdditionalinfo;
+
+			myWeapon->AdditionalWeaponInfo.Round = myWeapon->WeaponSetting.MaxMagazine;
 			/*
 			
 			myWeapon->WeaponSetting = myWeaponInfo;
@@ -252,6 +262,12 @@ void AGasolineCircleCharacter::InitWeapon(FAdditionalWeaponInfo WeaponAdditional
 
 			myWeapon->OnWeaponReloadStart.AddDynamic(this, &AGasolineCircleCharacter::WeaponReloadStart);
 			myWeapon->OnWeaponReloadEnd.AddDynamic(this, &AGasolineCircleCharacter::WeaponReloadEnd);
+
+			myWeapon->OnWeaponFireStart.AddDynamic(this, &AGasolineCircleCharacter::WeaponFireStart);
+		}
+		if (InventoryComponent)
+		{
+			InventoryComponent->WeaponChangeAmmo(myWeapon->WeaponSetting.MaxMagazine);
 		}
 	}
 }
