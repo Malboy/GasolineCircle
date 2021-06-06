@@ -110,3 +110,8 @@ void AGasolineCirclePlayerController::OnSetDestinationReleased()
 	// clear flag to indicate we should stop updating the destination
 	bMoveToMouseCursor = false;
 }
+
+void AGasolineCirclePlayerController::OnUnPossess()
+{
+	Super::OnUnPossess();
+}

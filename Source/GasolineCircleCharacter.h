@@ -7,6 +7,7 @@
 #include "WeaponDefault.h"
 #include "Types.h"
 #include "InventoryComponent.h"
+#include "CharacterHealthComponent.h"
 #include "GasolineCircleCharacter.generated.h"
 
 UCLASS(Blueprintable)
@@ -33,8 +34,10 @@ public:
 	/** Returns CursorToWorld subobject **/
 	FORCEINLINE class UDecalComponent* GetCursorToWorld() { return CursorToWorld; }
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
-		class UInventoryComponent* InventoryComponent;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "Inventory"))
+		class UInventoryComponent* InventoryComponent;	
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "Health"))
+		class UCharacterHealthComponent* CharacterHealthComponent;
 
 private:
 	/** Top down camera */
@@ -92,5 +95,13 @@ public:
 	//Functions
 	UFUNCTION(BlueprintCallable)
 		void AttackCharEvent(bool bIsFiring);
+	UFUNCTION()
+		void CharDead();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement")
+		bool bIsAlive = true;
+	
+
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)override;
 };
 

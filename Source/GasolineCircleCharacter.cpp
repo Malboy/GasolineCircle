@@ -56,6 +56,11 @@ AGasolineCircleCharacter::AGasolineCircleCharacter()
 
 	// SetupInventory
 	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
+	CharacterHealthComponent = CreateDefaultSubobject<UCharacterHealthComponent>(TEXT("HealthComponent"));
+	if (CharacterHealthComponent)
+	{
+		CharacterHealthComponent->OnDead.AddDynamic(this, &AGasolineCircleCharacter::CharDead);
+	}
 	if (InventoryComponent)
 	{
 		InventoryComponent->OnSwitchWeapon.AddDynamic(this, &AGasolineCircleCharacter::InitWeapon);
@@ -132,23 +137,26 @@ void AGasolineCircleCharacter::InputAxisY(float Y_value)
 // pulling movement vector
 void AGasolineCircleCharacter::MovementTick(float DelatTime)
 {
-	AddMovementInput(FVector(1.0f, 0.0f, 0.0f), AxisX);
-	AddMovementInput(FVector(0.0f, 1.0f, 0.0f), AxisY);
-
-	//CharacterRotationToCursor
-	APlayerController* myController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-	if (myController)
+	if (bIsAlive)
 	{
-		FHitResult ResultHit;
-		myController->GetHitResultUnderCursor(ECC_GameTraceChannel1, true, ResultHit);
-		
-		float CharRotationResultByYaw = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), ResultHit.Location).Yaw;
-		SetActorRotation(FQuat(FRotator(0.0f, CharRotationResultByYaw, 0.0f)));
-		
-		if (CurrentWeapon)
+		AddMovementInput(FVector(1.0f, 0.0f, 0.0f), AxisX);
+		AddMovementInput(FVector(0.0f, 1.0f, 0.0f), AxisY);
+
+		//CharacterRotationToCursor
+		APlayerController* myController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+		if (myController)
 		{
-			FVector Displacement = FVector(0.0f, 0.0f, 120.0f);
-			CurrentWeapon->ShootEndLocation = ResultHit.Location + Displacement;
+			FHitResult ResultHit;
+			myController->GetHitResultUnderCursor(ECC_GameTraceChannel1, true, ResultHit);
+
+			float CharRotationResultByYaw = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), ResultHit.Location).Yaw;
+			SetActorRotation(FQuat(FRotator(0.0f, CharRotationResultByYaw, 0.0f)));
+
+			if (CurrentWeapon)
+			{
+				FVector Displacement = FVector(0.0f, 0.0f, 120.0f);
+				CurrentWeapon->ShootEndLocation = ResultHit.Location + Displacement;
+			}
 		}
 	}
 }
@@ -221,6 +229,25 @@ void AGasolineCircleCharacter::AttackCharEvent(bool bIsFiring)
 		//myWeapon->OnWeaponReloadStart.AddDynamic(this, &AGasolineCircleCharacter::WeaponReloadStart);
 		//myWeapon->OnWeaponReloadEnd.AddDynamic(this, &AGasolineCircleCharacter::WeaponReloadEnd);
 	}
+}
+
+void AGasolineCircleCharacter::CharDead()
+{
+	bIsAlive = false;
+	UnPossessed();
+
+	GetCursorToWorld()->SetVisibility(false);
+}
+
+float AGasolineCircleCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	float ActualDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	if (bIsAlive)
+	{
+		CharacterHealthComponent->ChangeCurrentHealth(-DamageAmount);
+	}
+	
+	return ActualDamage;
 }
 
 void AGasolineCircleCharacter::InitWeapon(FAdditionalWeaponInfo WeaponAdditionalinfo)
